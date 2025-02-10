@@ -9,6 +9,6 @@ public class HelloController {
 
     @FXML
     protected void onHelloButtonClick() {
-        welcomeText.setText("Welcome to JavaFX Application!");
+        Pi4j pi4j = new Pi4j();
     }
 }
