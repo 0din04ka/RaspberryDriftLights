@@ -46,7 +46,11 @@
             <artifactId>pi4j-core</artifactId>
             <version>${pi4j.version}</version>
         </dependency>
-
+        <dependency>
+            <groupId>com.pi4j</groupId>
+            <artifactId>pi4j-plugin-linuxfs</artifactId>
+            <version>${pi4j.version}</version>
+        </dependency>
         <!-- include Pi4J Plugins (Platforms and I/O Providers) -->
         <dependency>
             <groupId>com.pi4j</groupId>
