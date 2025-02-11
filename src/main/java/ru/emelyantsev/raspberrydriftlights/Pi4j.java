@@ -5,13 +5,12 @@ import com.pi4j.context.Context;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Pi4j {
+    private static final Logger logger = LoggerFactory.getLogger(Pi4j.class);
+
     // Адреса устройств
     private static final int TCA9548A_ADDRESS = 0x70; // Адрес мультиплексора TCA9548A
     private static final int VL53L0X_DEFAULT_ADDRESS = 0x29; // Адрес датчика VL53L0X
@@ -25,6 +24,7 @@ public class Pi4j {
     public Pi4j() {
         // Инициализация Pi4J
         pi4j = Pi4J.newAutoContext();
+        logger.info("Pi4J initialized.");
 
         // Настройка I2C для мультиплексора TCA9548A
         I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
@@ -34,6 +34,7 @@ public class Pi4j {
                 .device(TCA9548A_ADDRESS)
                 .build();
         tca9548a = i2CProvider.create(tca9548aConfig);
+        logger.info("TCA9548A initialized.");
     }
 
     // Выбор канала на мультиплексоре TCA9548A
@@ -42,12 +43,14 @@ public class Pi4j {
             throw new IllegalArgumentException("Channel must be between 0 and 7");
         }
         tca9548a.writeRegister(0x00, (byte) (1 << channel));
+        logger.info("Selected channel: {}", channel);
     }
 
     // Инициализация датчика VL53L0X
     private void initVL53L0X(I2C vl53l0x) {
         // Запуск измерения (пример для VL53L0X)
         vl53l0x.writeRegister(0x00, (byte) 0x01); // Замените на реальный регистр
+        logger.info("VL53L0X initialized.");
     }
 
     // Чтение расстояния с датчика VL53L0X
@@ -57,13 +60,14 @@ public class Pi4j {
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                logger.error("Interrupted while waiting for data.", e);
             }
         }
 
         // Чтение расстояния (пример для VL53L0X)
         int distance = vl53l0x.readRegister(0x14 + 10) << 8; // Замените на реальные регистры
         distance |= vl53l0x.readRegister(0x14 + 11);
+        logger.info("Distance read: {} mm", distance);
         return distance;
     }
 
@@ -95,22 +99,23 @@ public class Pi4j {
             while (true) {
                 selectChannel(0);
                 int distance1 = readDistance(vl53l0x1);
-                System.out.println("Distance from sensor 1: " + distance1 + " mm");
+                logger.info("Distance from sensor 1: {} mm", distance1);
 
                 selectChannel(1);
                 int distance2 = readDistance(vl53l0x2);
-                System.out.println("Distance from sensor 2: " + distance2 + " mm");
+                logger.info("Distance from sensor 2: {} mm", distance2);
 
                 Thread.sleep(1000); // Пауза между измерениями
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("An error occurred.", e);
         } finally {
             // Закрытие устройств и освобождение ресурсов
             if (vl53l0x1 != null) vl53l0x1.close();
             if (vl53l0x2 != null) vl53l0x2.close();
             if (tca9548a != null) tca9548a.close();
             if (pi4j != null) pi4j.shutdown();
+            logger.info("Resources released.");
         }
     }
 }
