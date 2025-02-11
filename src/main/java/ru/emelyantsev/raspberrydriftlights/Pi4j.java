@@ -12,16 +12,15 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class Pi4j {
+    // Адреса устройств
     private static final int TCA9548A_ADDRESS = 0x70; // Адрес мультиплексора TCA9548A
     private static final int VL53L0X_DEFAULT_ADDRESS = 0x29; // Адрес датчика VL53L0X
 
-    // Регистры датчика VL53L0X
-    private static final int VL53L0X_REG_SYSRANGE_START = 0x00;
-    private static final int VL53L0X_REG_RESULT_RANGE_STATUS = 0x14;
-    private static final int VL53L0X_REG_RESULT_INTERRUPT_STATUS = 0x13;
-
+    // Контекст Pi4J и устройства
     private Context pi4j;
     private I2C tca9548a;
+    private I2C vl53l0x1;
+    private I2C vl53l0x2;
 
     public Pi4j() {
         // Инициализация Pi4J
@@ -30,8 +29,8 @@ public class Pi4j {
         // Настройка I2C для мультиплексора TCA9548A
         I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
         I2CConfig tca9548aConfig = I2C.newConfigBuilder(pi4j)
-                .id("TCA9548A")
-                .bus(1) // I2C шина (обычно 1 на Raspberry Pi)
+                .id("TCA9548A") // Уникальный идентификатор для мультиплексора
+                .bus(1) // Номер шины I2C (обычно 1 на Raspberry Pi)
                 .device(TCA9548A_ADDRESS)
                 .build();
         tca9548a = i2CProvider.create(tca9548aConfig);
@@ -47,14 +46,14 @@ public class Pi4j {
 
     // Инициализация датчика VL53L0X
     private void initVL53L0X(I2C vl53l0x) {
-        // Запуск измерения
-        vl53l0x.writeRegister(VL53L0X_REG_SYSRANGE_START, (byte) 0x01);
+        // Запуск измерения (пример для VL53L0X)
+        vl53l0x.writeRegister(0x00, (byte) 0x01); // Замените на реальный регистр
     }
 
     // Чтение расстояния с датчика VL53L0X
     private int readDistance(I2C vl53l0x) {
-        // Ожидание готовности данных
-        while ((vl53l0x.readRegister(VL53L0X_REG_RESULT_INTERRUPT_STATUS) & 0x07) == 0) {
+        // Ожидание готовности данных (пример для VL53L0X)
+        while ((vl53l0x.readRegister(0x13) & 0x07) == 0) { // Замените на реальный регистр
             try {
                 Thread.sleep(10);
             } catch (InterruptedException e) {
@@ -62,30 +61,34 @@ public class Pi4j {
             }
         }
 
-        // Чтение расстояния
-        int distance = vl53l0x.readRegister(VL53L0X_REG_RESULT_RANGE_STATUS + 10) << 8;
-        distance |= vl53l0x.readRegister(VL53L0X_REG_RESULT_RANGE_STATUS + 11);
+        // Чтение расстояния (пример для VL53L0X)
+        int distance = vl53l0x.readRegister(0x14 + 10) << 8; // Замените на реальные регистры
+        distance |= vl53l0x.readRegister(0x14 + 11);
         return distance;
     }
 
     public void run() {
         try {
-            // Настройка I2C для датчиков VL53L0X
             I2CProvider i2CProvider = pi4j.provider("linuxfs-i2c");
-            I2CConfig vl53l0xConfig = I2C.newConfigBuilder(pi4j)
-                    .id("VL53L0X")
+
+            // Настройка и создание первого датчика (канал 0)
+            selectChannel(0);
+            I2CConfig vl53l0xConfig1 = I2C.newConfigBuilder(pi4j)
+                    .id("VL53L0X-1") // Уникальный идентификатор для первого датчика
                     .bus(1)
                     .device(VL53L0X_DEFAULT_ADDRESS)
                     .build();
-
-            // Работа с первым датчиком (канал 0)
-            selectChannel(0);
-            I2C vl53l0x1 = i2CProvider.create(vl53l0xConfig);
+            vl53l0x1 = i2CProvider.create(vl53l0xConfig1);
             initVL53L0X(vl53l0x1);
 
-            // Работа со вторым датчиком (канал 1)
+            // Настройка и создание второго датчика (канал 1)
             selectChannel(1);
-            I2C vl53l0x2 = i2CProvider.create(vl53l0xConfig);
+            I2CConfig vl53l0xConfig2 = I2C.newConfigBuilder(pi4j)
+                    .id("VL53L0X-2") // Уникальный идентификатор для второго датчика
+                    .bus(1)
+                    .device(VL53L0X_DEFAULT_ADDRESS)
+                    .build();
+            vl53l0x2 = i2CProvider.create(vl53l0xConfig2);
             initVL53L0X(vl53l0x2);
 
             // Чтение данных с датчиков
@@ -102,7 +105,12 @@ public class Pi4j {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        } finally {
+            // Закрытие устройств и освобождение ресурсов
+            if (vl53l0x1 != null) vl53l0x1.close();
+            if (vl53l0x2 != null) vl53l0x2.close();
+            if (tca9548a != null) tca9548a.close();
+            if (pi4j != null) pi4j.shutdown();
         }
     }
-
 }
