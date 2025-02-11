@@ -59,7 +59,7 @@ public class Pi4j {
     public void run() {
 
         VL53L0X_Device vl53l0x = new VL53L0X_Device(pi4j, 1, VL53L0X_DEFAULT_ADDRESS, "info");
-        selectChannel(1);
+        selectChannel(0);
 
         while (true) {
             int distance = readDistance(vl53l0x);
