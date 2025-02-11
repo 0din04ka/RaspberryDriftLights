@@ -55,18 +55,10 @@ public class Pi4j {
 
     // Чтение расстояния с датчика VL53L0X
     private int readDistance(I2C vl53l0x) {
-        // Ожидание готовности данных (пример для VL53L0X)
-        while ((vl53l0x.readRegister(0x13) & 0x07) == 0) { // Замените на реальный регистр
-            try {
-                Thread.sleep(10);
-            } catch (InterruptedException e) {
-                logger.error("Interrupted while waiting for data.", e);
-            }
-        }
 
-        // Чтение расстояния (пример для VL53L0X)
-        int distance = vl53l0x.readRegister(0x14 + 10) << 8; // Замените на реальные регистры
-        distance |= vl53l0x.readRegister(0x14 + 11);
+        byte[] buffer = new byte[2];
+        vl53l0x.read(buffer);
+        int distance = (buffer[0] << 8) | buffer[1];
         logger.info("Distance read: {} mm", distance);
         return distance;
     }
