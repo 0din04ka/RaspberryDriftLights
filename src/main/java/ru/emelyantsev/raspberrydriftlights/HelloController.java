@@ -10,5 +10,6 @@ public class HelloController {
     @FXML
     protected void onHelloButtonClick() {
         Pi4j pi4j = new Pi4j();
+        pi4j.run();
     }
 }
