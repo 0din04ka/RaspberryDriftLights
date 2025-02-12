@@ -44,14 +44,12 @@ public class Pi4J2 {
             // Инициализация датчика
             initVL53L0X(vl53l0x);
 
-            // Проверка подключения
-            int modelId = vl53l0x.readRegister(VL53L0X_REG_IDENTIFICATION_MODEL_ID);
-            System.out.println("VL53L0X Model ID: " + modelId);
-
             // Основной цикл
             while (true) {
+                // Запуск измерения
                 vl53l0x.writeRegister(VL53L0X_REG_SYSRANGE_START, 0x01);
 
+                // Ожидание завершения измерения
                 long startTime = System.currentTimeMillis();
                 while ((vl53l0x.readRegister(VL53L0X_REG_RESULT_INTERRUPT_STATUS) & 0x07) == 0) {
                     if (System.currentTimeMillis() - startTime > 1000) {
@@ -61,10 +59,17 @@ public class Pi4J2 {
                     Thread.sleep(10);
                 }
 
-                int range = vl53l0x.readRegister(VL53L0X_REG_RESULT_RANGE_VAL);
-                System.out.println("Distance: " + range + " mm");
+                // Чтение результата
+                int rangeStatus = vl53l0x.readRegister(VL53L0X_REG_RESULT_RANGE_STATUS);
+                if ((rangeStatus & 0x78) == 0) { // Проверка статуса измерения
+                    int range = (vl53l0x.readRegister(VL53L0X_REG_RESULT_RANGE_VAL) << 8) |
+                            vl53l0x.readRegister(VL53L0X_REG_RESULT_RANGE_VAL + 1);
+                    System.out.println("Distance: " + range + " mm");
+                } else {
+                    System.out.println("Measurement error: " + rangeStatus);
+                }
 
-                Thread.sleep(1000);
+                Thread.sleep(1000); // Задержка между измерениями
             }
 
         } catch (Exception e) {
@@ -75,11 +80,13 @@ public class Pi4J2 {
     }
 
     private static void initVL53L0X(I2C vl53l0x) throws Exception {
-        // Сброс и настройка датчика
+        // Сброс датчика
         vl53l0x.writeRegister(0x00, 0x00);
         Thread.sleep(100);
         vl53l0x.writeRegister(0x00, 0x01);
         Thread.sleep(100);
+
+        // Настройка режима измерения
         vl53l0x.writeRegister(0x88, 0x00);
         Thread.sleep(100);
         vl53l0x.writeRegister(0x80, 0x01);
