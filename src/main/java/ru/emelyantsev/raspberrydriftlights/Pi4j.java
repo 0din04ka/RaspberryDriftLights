@@ -71,7 +71,6 @@ public class Pi4j {
         vl53l0x.writeRegister(0x8A, (byte) newAddress);
         vl53l0x.shutdown(pi4j);
         vl53l0x.close();
-        pi4j.registry().remove("i2c-1.41");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
