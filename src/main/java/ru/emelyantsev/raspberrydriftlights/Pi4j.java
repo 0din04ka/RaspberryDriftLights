@@ -71,15 +71,14 @@ public class Pi4j {
         vl53l0x.writeRegister(0x8A, (byte) newAddress);
         vl53l0x.shutdown(pi4j);
         vl53l0x.close();
+        pi4j.registry().remove("i2c-1.41");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
         logger.info("Changed address for sensor on channel {} to 0x{}", channel, Integer.toHexString(newAddress));
     }
-
-//    // Инициализация датчика VL53L0X
-//    private void initVL53L0X(I2C vl53l0x) {
-//        // Запуск измерения (пример для VL53L0X)
-//        vl53l0x.writeRegister(0x00, (byte) 0x01); // Замените на реальный регистр
-//        logger.info("VL53L0X initialized.");
-//    }
 
     // Чтение расстояния с датчика VL53L0X
     private int readDistance(VL53L0X_Device vl53l0x) {
