@@ -98,14 +98,15 @@ public class Pi4j {
     }
 
     // Чтение расстояния с датчика VL53L0X
-    private int readDistance(VL53L0X_Device vl53l0x) {
+    private int readDistance(VL53L0X_Device vl53l0x, Integer channel) {
+        logger.info("try to read distance {}" , channel);
         return vl53l0x.range();
     }
 
     public void run(VL53L0X_Device sensor, Integer channel) {
         logger.info("Starting sensor: {}", channel);
         while (true) {
-            int distance = readDistance(sensor);
+            int distance = readDistance(sensor, channel);
             logger.info("Distance: {} mm, Sensor {}", distance, channel);
             try {
                 Thread.sleep(100);
