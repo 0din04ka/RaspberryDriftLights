@@ -45,39 +45,51 @@ public class Pi4j {
                 .device(TCA9548A_ADDRESS)
                 .build();
         tca9548a = i2CProvider.create(tca9548aConfig);
-        try {
-        Arrays.stream(tcaChannels).forEach(channel -> {
-            logger.info("Start change");
-            logger.info(pi4j.registry().allByIoType(IOType.I2C).toString());
+
             vl53l0x = pi4j.i2c().create(1, 0x29);
-            setNewAddress(channel, newAddresses[channel], vl53l0x);
-            vl53l0x = null;
-            logger.info("End change");
-        sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel], "info"));});
-        } catch (Exception e) {
-        } finally {
+            setNewAddress(0, newAddresses[0], vl53l0x);
             String deviceId = "I2C-1.41";
             if (pi4j.registry().exists(deviceId)) {
                 logger.warn("Removing existing I2C instance: {}", deviceId);
                 pi4j.registry().remove(deviceId);
             }
-        }
-//        for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
-//            executor.submit(() -> run(entry.getValue(), ));
+            vl53l0x = pi4j.i2c().create(1, 0x29);
+            setNewAddress(2, newAddresses[1], vl53l0x);
+            executor.submit(() -> run(sensors.get(0), 0));
+            executor.submit(() -> run(sensors.get(2), 2));
+//        try {
+//        Arrays.stream(tcaChannels).forEach(channel -> {
+//            logger.info("Start change");
+//            logger.info(pi4j.registry().allByIoType(IOType.I2C).toString());
+//            vl53l0x = pi4j.i2c().create(1, 0x29);
+//            setNewAddress(channel, newAddresses[channel], vl53l0x);
+//            vl53l0x = null;
+//            logger.info("End change");
+//        sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel], "info"));});
+//        } catch (Exception e) {
+//        } finally {
+//            String deviceId = "I2C-1.41";
+//            if (pi4j.registry().exists(deviceId)) {
+//                logger.warn("Removing existing I2C instance: {}", deviceId);
+//                pi4j.registry().remove(deviceId);
+//            }
 //        }
-        logger.info(sensors.values().toString());
-        logger.info("TCA9548A initialized.");
-//        Arrays.stream(tcaChannelsreverse).forEach(channel -> {
-//            executor.submit(() -> run(sensors.get(channel), channel));
-//        });
-        executor.submit(() -> run(sensors.get(0), 0));
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        executor.submit(() -> run(sensors.get(1), 1));
-        executor.submit(() -> run(sensors.get(2), 2));
+////        for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
+////            executor.submit(() -> run(entry.getValue(), ));
+////        }
+//        logger.info(sensors.values().toString());
+//        logger.info("TCA9548A initialized.");
+////        Arrays.stream(tcaChannelsreverse).forEach(channel -> {
+////            executor.submit(() -> run(sensors.get(channel), channel));
+////        });
+//        executor.submit(() -> run(sensors.get(0), 0));
+//        try {
+//            Thread.sleep(10000);
+//        } catch (InterruptedException e) {
+//            throw new RuntimeException(e);
+//        }
+//        executor.submit(() -> run(sensors.get(1), 1));
+//        executor.submit(() -> run(sensors.get(2), 2));
     }
 
     // Выбор канала на мультиплексоре TCA9548A
@@ -95,11 +107,14 @@ public class Pi4j {
         vl53l0x.writeRegister(0x8A, (byte) newAddress);
         vl53l0x.shutdown(pi4j);
         vl53l0x.close();
+
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddress, "info"));
+        logger.info(sensors.get(channel).toString());
         logger.info("Changed address for sensor on channel {} to 0x{}", channel, Integer.toHexString(newAddress));
     }
 
