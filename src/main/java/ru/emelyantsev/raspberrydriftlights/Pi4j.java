@@ -26,8 +26,8 @@ public class Pi4j {
     private I2C tca9548a;
     private I2C vl53l0x;
    // private I2C vl53l0x2;
-   private int[] tcaChannels = {1, 2};
-   private int[] newAddresses = {0x31, 0x30};
+   private int[] tcaChannels = {0, 1, 2};
+   private int[] newAddresses = {0x30, 0x31, 0x32};
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     private static final Map<Integer, VL53L0X_Device> sensors = new ConcurrentHashMap<>();
 
@@ -45,14 +45,23 @@ public class Pi4j {
                 .device(TCA9548A_ADDRESS)
                 .build();
         tca9548a = i2CProvider.create(tca9548aConfig);
+        try {
         Arrays.stream(tcaChannels).forEach(channel -> {
             logger.info("Start change");
             logger.info(pi4j.registry().allByIoType(IOType.I2C).toString());
             vl53l0x = pi4j.i2c().create(1, 0x29);
-            setNewAddress(channel, newAddresses[channel - 1], vl53l0x);
+            setNewAddress(channel, newAddresses[channel], vl53l0x);
             vl53l0x = null;
             logger.info("End change");
-        sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel - 1], "info"));});
+        sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel], "info"));});
+        } catch (Exception e) {
+        } finally {
+            String deviceId = "I2C-1.41";
+            if (pi4j.registry().exists(deviceId)) {
+                logger.warn("Removing existing I2C instance: {}", deviceId);
+                pi4j.registry().remove(deviceId);
+            }
+        }
 //        for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
 //            executor.submit(() -> run(entry.getValue(), ));
 //        }
@@ -89,11 +98,6 @@ public class Pi4j {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        String deviceId = "I2C-1.41";
-        if (pi4j.registry().exists(deviceId)) {
-            logger.warn("Removing existing I2C instance: {}", deviceId);
-            pi4j.registry().remove(deviceId);
-        }
         logger.info("Changed address for sensor on channel {} to 0x{}", channel, Integer.toHexString(newAddress));
     }
 
@@ -104,7 +108,7 @@ public class Pi4j {
     }
 
     public void run(VL53L0X_Device sensor, Integer channel) {
-        logger.info("Starting sensor: {}", channel);
+        logger.info("Starting sensor: {}, null: {}", channel, sensor == null);
         while (true) {
             int distance = readDistance(sensor, channel);
             logger.info("Distance: {} mm, Sensor {}", distance, channel);
