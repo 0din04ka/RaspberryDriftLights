@@ -27,7 +27,7 @@ public class Pi4j {
     private I2C vl53l0x;
    // private I2C vl53l0x2;
    private int[] tcaChannels = {1, 2};
-   private int[] newAddresses = {0x31, 0x32};
+   private int[] newAddresses = {0x31, 0x30};
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     private static final Map<Integer, VL53L0X_Device> sensors = new ConcurrentHashMap<>();
 
@@ -60,13 +60,13 @@ public class Pi4j {
 //        Arrays.stream(tcaChannelsreverse).forEach(channel -> {
 //            executor.submit(() -> run(sensors.get(channel), channel));
 //        });
-        executor.submit(() -> run(sensors.get(0), 1));
+        executor.submit(() -> run(sensors.get(1), 1));
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
-        executor.submit(() -> run(sensors.get(1), 2));
+        executor.submit(() -> run(sensors.get(2), 2));
     }
 
     // Выбор канала на мультиплексоре TCA9548A
