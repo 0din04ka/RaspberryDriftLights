@@ -65,16 +65,18 @@ public class Pi4j {
 //        for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
 //            executor.submit(() -> run(entry.getValue(), ));
 //        }
+        logger.info(sensors.values().toString());
         logger.info("TCA9548A initialized.");
 //        Arrays.stream(tcaChannelsreverse).forEach(channel -> {
 //            executor.submit(() -> run(sensors.get(channel), channel));
 //        });
-        executor.submit(() -> run(sensors.get(1), 1));
+        executor.submit(() -> run(sensors.get(0), 0));
         try {
             Thread.sleep(10000);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        executor.submit(() -> run(sensors.get(1), 1));
         executor.submit(() -> run(sensors.get(2), 2));
     }
 
