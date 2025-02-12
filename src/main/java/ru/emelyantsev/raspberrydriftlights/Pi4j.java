@@ -44,8 +44,12 @@ public class Pi4j {
                 .build();
         tca9548a = i2CProvider.create(tca9548aConfig);
         Arrays.stream(tcaChannels).forEach(channel -> {
+            logger.info("Start change");
             vl53l0x = pi4j.i2c().create(1, 0x29);
             setNewAddress(channel, newAddresses[channel], vl53l0x);
+            vl53l0x.close();
+            vl53l0x = null;
+            logger.info("End change");
         sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel], "info"));});
         for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
             executor.submit(() -> run(entry.getValue()));
