@@ -2,6 +2,7 @@ package ru.emelyantsev.raspberrydriftlights;
 
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
+import com.pi4j.io.IOType;
 import com.pi4j.io.i2c.I2C;
 import com.pi4j.io.i2c.I2CConfig;
 import com.pi4j.io.i2c.I2CProvider;
@@ -45,6 +46,12 @@ public class Pi4j {
         tca9548a = i2CProvider.create(tca9548aConfig);
         Arrays.stream(tcaChannels).forEach(channel -> {
             logger.info("Start change");
+            logger.info(pi4j.registry().allByIoType(IOType.I2C).toString());
+            String deviceId = "i2c-1.41";
+            if (pi4j.registry().exists(deviceId)) {
+                logger.warn("Removing existing I2C instance: {}", deviceId);
+                pi4j.registry().remove(deviceId);
+            }
             vl53l0x = pi4j.i2c().create(1, 0x29);
             setNewAddress(channel, newAddresses[channel], vl53l0x);
             vl53l0x = null;
