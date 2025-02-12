@@ -47,7 +47,6 @@ public class Pi4j {
             logger.info("Start change");
             vl53l0x = pi4j.i2c().create(1, 0x29);
             setNewAddress(channel, newAddresses[channel], vl53l0x);
-            vl53l0x.close();
             vl53l0x = null;
             logger.info("End change");
         sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel], "info"));});
@@ -70,6 +69,7 @@ public class Pi4j {
         // Выбор канала на мультиплексоре
         selectChannel(channel);
         vl53l0x.writeRegister(0x8A, (byte) newAddress);
+        vl53l0x.shutdown(pi4j);
         vl53l0x.close();
         logger.info("Changed address for sensor on channel {} to 0x{}", channel, Integer.toHexString(newAddress));
     }
