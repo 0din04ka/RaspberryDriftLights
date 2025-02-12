@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -26,6 +27,7 @@ public class Pi4j {
     private I2C vl53l0x;
    // private I2C vl53l0x2;
    private int[] tcaChannels = {0, 1};
+    private int[] tcaChannelsreverse = {1, 0};
    private int[] newAddresses = {0x30, 0x31};
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     private static final Map<Integer, VL53L0X_Device> sensors = new ConcurrentHashMap<>();
@@ -56,7 +58,7 @@ public class Pi4j {
 //            executor.submit(() -> run(entry.getValue(), ));
 //        }
         logger.info("TCA9548A initialized.");
-        Arrays.stream(tcaChannels).forEach(channel -> {
+        Arrays.stream(tcaChannelsreverse).forEach(channel -> {
             executor.submit(() -> run(sensors.get(channel), channel));
         });
     }
@@ -98,7 +100,7 @@ public class Pi4j {
         logger.info("Starting sensor: {}", channel);
         while (true) {
             int distance = readDistance(sensor);
-            logger.info("Distance: {} mm", distance);
+            logger.info("Distance: {} mm, Sensor {}", distance, channel);
             try {
                 Thread.sleep(100);
             } catch (InterruptedException e) {
