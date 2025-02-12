@@ -47,7 +47,7 @@ public class Pi4j {
         Arrays.stream(tcaChannels).forEach(channel -> {
             logger.info("Start change");
             logger.info(pi4j.registry().allByIoType(IOType.I2C).toString());
-            String deviceId = "i2c-1.41";
+            String deviceId = "I2C-1.41";
             if (pi4j.registry().exists(deviceId)) {
                 logger.warn("Removing existing I2C instance: {}", deviceId);
                 pi4j.registry().remove(deviceId);
