@@ -27,8 +27,7 @@ public class Pi4j {
     private I2C vl53l0x;
    // private I2C vl53l0x2;
    private int[] tcaChannels = {0, 1};
-    private int[] tcaChannelsreverse = {1, 0};
-   private int[] newAddresses = {0x30, 0x31};
+   private int[] newAddresses = {0x31, 0x30};
     private static final ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
     private static final Map<Integer, VL53L0X_Device> sensors = new ConcurrentHashMap<>();
 
