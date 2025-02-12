@@ -47,20 +47,18 @@ public class Pi4j {
         Arrays.stream(tcaChannels).forEach(channel -> {
             logger.info("Start change");
             logger.info(pi4j.registry().allByIoType(IOType.I2C).toString());
-            String deviceId = "I2C-1.41";
-            if (pi4j.registry().exists(deviceId)) {
-                logger.warn("Removing existing I2C instance: {}", deviceId);
-                pi4j.registry().remove(deviceId);
-            }
             vl53l0x = pi4j.i2c().create(1, 0x29);
             setNewAddress(channel, newAddresses[channel], vl53l0x);
             vl53l0x = null;
             logger.info("End change");
         sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel], "info"));});
-        for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
-            executor.submit(() -> run(entry.getValue()));
-        }
+//        for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
+//            executor.submit(() -> run(entry.getValue(), ));
+//        }
         logger.info("TCA9548A initialized.");
+        Arrays.stream(tcaChannels).forEach(channel -> {
+            executor.submit(() -> run(sensors.get(channel), channel));
+        });
     }
 
     // Выбор канала на мультиплексоре TCA9548A
@@ -83,6 +81,11 @@ public class Pi4j {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        String deviceId = "I2C-1.41";
+        if (pi4j.registry().exists(deviceId)) {
+            logger.warn("Removing existing I2C instance: {}", deviceId);
+            pi4j.registry().remove(deviceId);
+        }
         logger.info("Changed address for sensor on channel {} to 0x{}", channel, Integer.toHexString(newAddress));
     }
 
@@ -91,12 +94,13 @@ public class Pi4j {
         return vl53l0x.range();
     }
 
-    public void run(VL53L0X_Device sensor) {
+    public void run(VL53L0X_Device sensor, Integer channel) {
+        logger.info("Starting sensor: {}", channel);
         while (true) {
             int distance = readDistance(sensor);
             logger.info("Distance: {} mm", distance);
             try {
-                Thread.sleep(1000);
+                Thread.sleep(100);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
