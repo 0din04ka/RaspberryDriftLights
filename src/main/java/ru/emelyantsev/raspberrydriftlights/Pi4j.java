@@ -49,10 +49,10 @@ public class Pi4j {
             logger.info("Start change");
             logger.info(pi4j.registry().allByIoType(IOType.I2C).toString());
             vl53l0x = pi4j.i2c().create(1, 0x29);
-            setNewAddress(channel, newAddresses[channel], vl53l0x);
+            setNewAddress(channel, newAddresses[channel - 1], vl53l0x);
             vl53l0x = null;
             logger.info("End change");
-        sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel], "info"));});
+        sensors.put(channel, new VL53L0X_Device(pi4j, 1, newAddresses[channel - 1], "info"));});
 //        for (Map.Entry<Integer, VL53L0X_Device> entry : sensors.entrySet()) {
 //            executor.submit(() -> run(entry.getValue(), ));
 //        }
