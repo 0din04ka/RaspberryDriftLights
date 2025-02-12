@@ -56,7 +56,12 @@ public class Pi4j {
             vl53l0x = pi4j.i2c().create(1, 0x29);
             setNewAddress(2, newAddresses[1], vl53l0x);
             executor.submit(() -> run(sensors.get(0), 0));
-            executor.submit(() -> run(sensors.get(2), 2));
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        run(sensors.get(2), 2);
 //        try {
 //        Arrays.stream(tcaChannels).forEach(channel -> {
 //            logger.info("Start change");
