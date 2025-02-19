@@ -34,6 +34,7 @@ public class pythonVL533L0X {
 
         // Калибровка (пример)
         writeRegister(FINAL_RANGE_CONFIG_MIN_COUNT_RATE_RTN_LIMIT, 0x00);
+        System.out.printf("Калибровка завершена");
     }
 
     /**
@@ -41,6 +42,8 @@ public class pythonVL533L0X {
      */
     public void startMeasurement() throws Exception {
         writeRegister(SYSRANGE_START, 0x01);
+        Thread.sleep(500);
+        System.out.printf("Запуск измерения");
     }
 
     /**
@@ -58,7 +61,7 @@ public class pythonVL533L0X {
         while (!isMeasurementComplete()) {
             Thread.sleep(10); // Небольшая задержка
         }
-
+        startMeasurement();
         // Чтение результата из регистров
         byte[] buffer = new byte[2];
         device.readRegister(RESULT_RANGE_STATUS, buffer, 0, 2);
