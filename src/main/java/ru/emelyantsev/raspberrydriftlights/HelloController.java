@@ -11,6 +11,6 @@ public class HelloController {
     protected void onHelloButtonClick() {
         //Pi4j pi4j = new Pi4j();
 //        pi4j.run();
-        Pi4J2 pi4J2 = new Pi4J2();
+        Pi4J3 pi4J3 = new Pi4J3();
     }
 }
