@@ -32,21 +32,6 @@ public class VL53L0X {
                 .build();
 
         i2c = i2cProvider.create(config);
-
-        VL53L0X sensor = new VL53L0X();
-
-        sensor.startRanging();
-        try {
-            Thread.sleep(100);
-            while (true) {
-                int distance = sensor.getDistance();
-                System.out.println("Distance: " + distance + " mm");
-            }
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        } finally {
-            sensor.close();
-        }
     }
 
     public void startRanging() {
