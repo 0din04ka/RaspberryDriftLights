@@ -1,4 +1,5 @@
 package ru.emelyantsev.raspberrydriftlights;
+
 import com.pi4j.Pi4J;
 import com.pi4j.context.Context;
 import com.pi4j.io.gpio.digital.DigitalInput;
@@ -35,29 +36,24 @@ public class VL53L0X {
     }
 
     public void startRanging() {
-        // Example: write to a register to start ranging
-        i2c.writeRegister(0x00, (byte) 0x01); // Hypothetical start command
+        i2c.writeRegister(0x00, (byte) 0x01);
         System.out.printf("Starting ranging\n");
     }
 
     public void stopRanging() {
-        // Example: write to a register to stop ranging
-        i2c.writeRegister(0x00, (byte) 0x00); // Hypothetical stop command
+        i2c.writeRegister(0x00, (byte) 0x00);
     }
 
     public int getDistance() {
         byte[] buffer = new byte[2];
-        i2c.readRegister(0x1E, buffer); // Hypothetical distance register
+        i2c.readRegister(0x1E, buffer);
         int distance = ((buffer[0] & 0xFF) << 8) | (buffer[1] & 0xFF);
         return distance;
     }
 
     public void changeAddress(int newAddress) {
-        // Write unlock sequence
-        i2c.writeRegister(0x18, (byte) 0xAA); // Hypothetical unlock high
-        i2c.writeRegister(0x19, (byte) 0xBB); // Hypothetical unlock low
-
-        // Write new address
+        i2c.writeRegister(0x18, (byte) 0xAA);
+        i2c.writeRegister(0x19, (byte) 0xBB);
         i2c.writeRegister(0x8A, (byte) (newAddress & 0x7F));
     }
 
@@ -78,8 +74,34 @@ public class VL53L0X {
         });
     }
 
+    public void setSignalRateLimit(double limit) {
+        int fixedPointLimit = (int)(limit * (1 << 16));
+        i2c.writeRegister(0x44, (byte)(fixedPointLimit >> 8));
+        i2c.writeRegister(0x45, (byte)(fixedPointLimit & 0xFF));
+    }
+
+    public void setMeasurementTimingBudgetMicroseconds(int budget) {
+        byte[] budgetBytes = new byte[] {
+                (byte)((budget >> 24) & 0xFF),
+                (byte)((budget >> 16) & 0xFF),
+                (byte)((budget >> 8) & 0xFF),
+                (byte)(budget & 0xFF)
+        };
+        i2c.writeRegister(0x01, budgetBytes);
+    }
+
+    public void setVcselPulsePeriod(int type, int period) {
+        int register = (type == 0) ? 0x50 : 0x70; // Hypothetical registers
+        i2c.writeRegister(register, (byte)period);
+    }
+
     public void close() {
         if (i2c != null) i2c.close();
         if (pi4j != null) pi4j.shutdown();
+    }
+
+    public static class VcselPeriodType {
+        public static final int PreRange = 0;
+        public static final int FinalRange = 1;
     }
 }
