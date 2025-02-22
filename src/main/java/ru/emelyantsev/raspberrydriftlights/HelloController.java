@@ -14,12 +14,14 @@ public class HelloController {
         //Pi4J3 pi4J3 = new Pi4J3();
         VL53L0X sensor = new VL53L0X();
 
-        sensor.startRanging();
+
         try {
-            Thread.sleep(100);
             while (true) {
+                sensor.startRanging();
+                Thread.sleep(100);
                 int distance = sensor.getDistance();
                 System.out.println("Distance: " + distance + " mm");
+                Thread.sleep(100);
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
