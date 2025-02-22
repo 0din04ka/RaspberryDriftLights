@@ -13,10 +13,10 @@ public class HelloController {
 //        pi4j.run();
         //Pi4J3 pi4J3 = new Pi4J3();
         VL53L0X sensor = new VL53L0X();
-        sensor.setSignalRateLimit(0.1); // Ограничение на минимальный сигнал
-        sensor.setMeasurementTimingBudgetMicroseconds(200000); // Увеличиваем тайминг для лучшей точности
-        sensor.setVcselPulsePeriod(VL53L0X.VcselPeriodType.PreRange, 18);
-        sensor.setVcselPulsePeriod(VL53L0X.VcselPeriodType.FinalRange, 14); // Set timing budget for accuracy
+        sensor.setSignalRateLimit(0.05); // Ограничение на минимальный сигнал
+        sensor.setMeasurementTimingBudgetMicroseconds(50000); // Увеличиваем тайминг для лучшей точности
+        sensor.setVcselPulsePeriod(VL53L0X.VcselPeriodType.PreRange, 14);
+        sensor.setVcselPulsePeriod(VL53L0X.VcselPeriodType.FinalRange, 10); // Set timing budget for accuracy
 
         try {
             while (true) {
