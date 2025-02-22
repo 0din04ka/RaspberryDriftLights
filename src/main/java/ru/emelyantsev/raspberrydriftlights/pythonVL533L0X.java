@@ -59,9 +59,9 @@ public class pythonVL533L0X {
     public int readDistance() throws Exception {
         // Ожидание завершения измерения
         while (!isMeasurementComplete()) {
+            System.out.printf("Измерение не завершено");
             Thread.sleep(10); // Небольшая задержка
         }
-        startMeasurement();
         // Чтение результата из регистров
         byte[] buffer = new byte[2];
         device.readRegister(RESULT_RANGE_STATUS, buffer, 0, 2);

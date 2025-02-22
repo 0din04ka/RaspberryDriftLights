@@ -36,6 +36,7 @@ public class Pi4J3 {
         try (I2C vl53l0x = pi4j.create(i2cConfig)) {
             pythonVL533L0X sensor = new pythonVL533L0X(vl53l0x);
             sensor.initialize();
+            sensor.startMeasurement();
 
             while (true) {
                 int distance = sensor.readDistance();
