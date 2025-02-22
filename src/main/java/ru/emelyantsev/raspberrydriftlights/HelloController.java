@@ -18,10 +18,10 @@ public class HelloController {
         try {
             while (true) {
                 sensor.startRanging();
-                Thread.sleep(100);
+                Thread.sleep(1000);
                 int distance = sensor.getDistance();
                 System.out.println("Distance: " + distance + " mm");
-                Thread.sleep(100);
+                Thread.sleep(1000);
             }
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
