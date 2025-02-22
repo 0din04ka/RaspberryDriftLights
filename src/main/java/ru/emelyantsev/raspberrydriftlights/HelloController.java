@@ -17,7 +17,7 @@ public class HelloController {
 //        sensor.setMeasurementTimingBudgetMicroseconds(50000); // Увеличиваем тайминг для лучшей точности
 //        sensor.setVcselPulsePeriod(VL53L0X.VcselPeriodType.PreRange, 14);
 //        sensor.setVcselPulsePeriod(VL53L0X.VcselPeriodType.FinalRange, 10); // Set timing budget for accuracy
-
+//comment
         try {
             while (true) {
                 sensor.startRanging();
